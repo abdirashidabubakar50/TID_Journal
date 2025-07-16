@@ -1,5 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field, model_validator
-from ..schemas.schemas import PyObjectId
+from ..utils.pyobjectid import PyObjectId
+from bson import ObjectId
+from typing import Optional
 
 class UserRegister(BaseModel):
     username: str = Field(..., min_length=3)
@@ -19,9 +21,13 @@ class User(BaseModel):
     email: str
 
 class UserInDB(User):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     hashed_password: str
 
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
 class LoginRequest(BaseModel):
     email: str
     password: str
