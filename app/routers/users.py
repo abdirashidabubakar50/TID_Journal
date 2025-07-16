@@ -78,7 +78,7 @@ async def login_user(data: LoginRequest) -> Token:
         data={
             "sub": user.username,
             "email": user.email,
-            "user_id": user.user_id
+            "user_id": str(user.id)
         },
         expires_delta=access_token_expires
     )
