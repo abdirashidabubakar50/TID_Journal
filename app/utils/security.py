@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional, Annotated
 from passlib.context import CryptContext
 from ..models.User import User, UserInDB
+from ..schema.schemas import list_serial, serialize_for_model
 from ..models.Token import Token, TokenData
 from ..config.Config import collection_name
 from fastapi.security import OAuth2PasswordBearer
@@ -31,6 +32,7 @@ def verify_password(plain_password, hashed_password):
 def get_user(email: str) -> Optional[UserInDB]:
     user = collection_name.find_one({"email": email})
     if user:
+        user = serialize_for_model(user)
         return UserInDB(**user)
     return None
 
@@ -62,7 +64,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         payload = jwt.decode(token, secret_key, algorithms=[ALGORITHM])
         username = payload.get("sub")
         email: str = payload.get("email")
-        user_id: str = paylaod.get("user_id")
+        user_id: str = payload.get("user_id")
         if username is  None or email is None or user_id is None:
             raise credentials_exception
         token_data = TokenData(username=username, email=email, user_id=user_id)
@@ -71,5 +73,5 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     
     user = get_user(email)
     if user is None:
-        return credentials_exception
+        raise credentials_exception
     return user
