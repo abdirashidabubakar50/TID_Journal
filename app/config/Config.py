@@ -14,3 +14,4 @@ except Exception as e:
 db = client.TIL_db
 
 collection_name = db["TIL_collection"]
+Journal_collection = db["journals"]
